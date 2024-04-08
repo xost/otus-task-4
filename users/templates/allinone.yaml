@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.app.name }}
+  labels:
+    app: {{ .Values.app.name }}
+data:
+  DBHOST: "{{ .Release.Name }}-postgresql"
+  DBPORT: "{{ .Values.db.port }}"
+  DBNAME: "{{ .Values.db.name }}"
+  DBUSER: "{{ .Values.db.user }}"
+  DBPASS: "{{ .Values.db.password }}"
+  HOST: "{{ .Values.app.host }}"
+  PORT: "{{ .Values.app.port }}"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.app.name }}
+        env:
+          - name: DBHOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: DBHOST
+          - name: DBPORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: DBPORT
+          - name: DBNAME
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: DBNAME
+          - name: DBUSER
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: DBUSER
+          - name: DBPASS
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: DBPASS
+          - name: HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: HOST
+          - name: PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.config.app.name }}
+                key: PORT
+        image: "{{ .Values.image.repo }}/{{ .Values.image.name }}:{{ .Values.image.version }}"
+        ports:
+          - name: web
+            containerPort: {{ .Values.app.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: {{ .Values.app.name }}
+  ports:
+    - protocol: {{ .Values.service.proto }}
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.app.port }}
+  type: {{ .Values.service.type }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.service.name }}
+            port:
+              number: {{ .Values.service.port }}
+  ingressClassName: {{ .Values.ingress.className }}
+

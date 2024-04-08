@@ -1,0 +1,8 @@
+apiVersion: v2
+name: users
+version: 0.0.1
+
+dependencies:
+  - name: postgresql
+    version: 14.x.x
+    repository: oci://registry-1.docker.io/bitnamicharts

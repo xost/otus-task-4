@@ -1,9 +1,0 @@
-CREATE:
-    curl -X POST http://localhost:8000/api/v1/users/create/ -H "Content-Type: application/json" -d '{"login":"xost","password":"pass","name":"Stas","email":"stas@mail.ru"}'
-GET USER:
-    curl -X GET http://localhost:8000/api/v1/users/get/?id=1
-GET USER LIST:
-UPDATE:
-    curl -X PUT http://localhost:8000/api/v1/users/update/ -H "Content-Type: application/json" -d '{"id":1,"login":"xost","name":"Ivan","email":"ivan@mail.ru"}'
-DELETE:
-    curl -X DELETE http://localhost:8000/api/v1/users/delete/?id=1
